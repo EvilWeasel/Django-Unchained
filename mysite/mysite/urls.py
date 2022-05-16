@@ -15,16 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.http import HttpResponse
-from django.urls import path
+from django.urls import include, path
 
-
-def Home(request):
-    return HttpResponse("Home Page")
-def Contact(request):
-    return HttpResponse("Contact Page")
+# def Home(request):
+#     return HttpResponse("Home Page")
+# def Contact(request):
+#     return HttpResponse("Contact Page")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('home/', Home),
-    path('contact/', Contact),
+    path('', include('accounts.urls')),
+    # path('home/', Home),
+    # path('contact/', Contact),
 ]
