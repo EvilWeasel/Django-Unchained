@@ -60,7 +60,6 @@ If you want to change the port for the development server, you can pass in any p
 python3 manage.py runserver <port>
 ```
 
-
 ## Understanding Apps in Django
 
 - Project more than a few pages
@@ -74,10 +73,9 @@ To create a new app use the following command:
 python manage.py startapp accounts
 ```
 
-
 ## URLs and routing
 
-![Django-URLs][Django-URLs]
+![Django-URLs][django-urls]
 
 To summarize, to return content to the user depending on the url-path, you need to do **2 things**:
 
@@ -90,7 +88,6 @@ urlpatterns = [
 	path('<urlPath>', <returnViewFunction>)
 ]
 ```
-
 
 2.  Create a view-function, which returns either a rendered view, or a simple `HttpResponse`
 
@@ -106,7 +103,6 @@ urlpatterns = [
 	path('/home', home)
 ]
 ```
-
 
 ## Templates and Inheritance
 
@@ -126,11 +122,9 @@ Inside this folder, we'll create a view called `dashboard.html` with following c
     <title>Dashboard</title>
   </head>
   <body>
-	  <h1>Dashboard</h1>
+    <h1>Dashboard</h1>
   </body>
 </html>
-
-
 ```
 
 To return this page when a user requests `<hostname>/home` we add a function to `views.py`, which returns the rendered page:
@@ -153,6 +147,7 @@ Create 2 more files exactly like this and add their url-pattern to the correspon
 Because it's unnecessary to repeat the same stuff that needs to be on every page, we use templates, from which our custom-views can inherit.
 
 First, create a new file called `main.html`:
+
 ```filetree
 -- templates
 	-- accounts
@@ -183,25 +178,27 @@ Inside we declare all the recuring html-tags and something from the Django-Frame
 </html>
 ```
 
-Now we can refactor our other templates, to *extend the 'accounts/main' template*.
+Now we can refactor our other templates, to _extend the 'accounts/main' template_.
 
 **`templates/accounts/dashboard.html`**
+
 ```html
 {% extends 'accounts/main.html' %} {% block content %}
 <h1>Dashboard</h1>
 {% endblock %}
 ```
 
-
 ### More Refactoring - Navbar template
 
 **`navbar.html`**
+
 ```html
 <h1>Navbar</h1>
-<hr>
+<hr />
 ```
 
 **`main.html`**
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -221,12 +218,12 @@ Now we can refactor our other templates, to *extend the 'accounts/main' template
 </html>
 ```
 
-Note that we didn't specify `navbar.html` as a template and therefore need to use the keyword *"include"* when using it in our pages.
-
+Note that we didn't specify `navbar.html` as a template and therefore need to use the keyword _"include"_ when using it in our pages.
 
 ## Upgrading our dashboard
 
 **`dashboard.html`**
+
 ```html
 {% extends 'accounts/main.html' %} {% block content %}
 <br />
@@ -269,11 +266,114 @@ Note that we didn't specify `navbar.html` as a template and therefore need to us
 This is basically just a little bit of UI for doing CRUD-Operations in the next part.
 For the styling to work, import [Bootstrap] into `main.html`.
 
+## Serving static files
+
+On receiving a http-request, we return a rendered view, defined by our template html-files. But what if we need to send additional files, typically linked inside the html with a `<link>` or `<script>` tag.
+
+To link static files in our html, we first need to set-up django for serving them.
+
+**`settings.py`**
+
+```python
+# ...
+STATIC_URL = 'static/'
+
+MEDIA_URL = 'images/'
+
+# Static files directories
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+# ...
+```
+
+With that done, we can insert a logo for our navbar.
+
+**`navbar.html`**
+
+```html
+{% load static %}
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <img src="{% static 'images/tux.ico' %}" alt="" width="50" height="50" />
+    </a>
+<!-- ... >
+```
+
+## Database and Models
+
+### Initital Migration
+
+In the default configuration, Django will setup a sqlite database automatically for us.
+
+To execute the initial migration for the auto-generated models, we use the following command:
+
+```bash
+python manage.py migrate
+```
+
+Just like in Entity-Framework in C# (Or many other ORM's), we make a migration every time our models change, to apply the changed to the schema in our DB.
+
+When changing the models, you need to first make the migration...
+
+```bash
+python manage.py makemigrations
+```
+
+...And **then** execute it.
+
+```bash
+python manage.py migrate
+```
+
+### Creating superuser for the admin-page
+
+Because we currently use sqlite, where we can't see our data, we create a superuser for the Django admin-page.
+
+```bash
+# Make sure
+python manage.py createsuperuser
+```
+
+The next time we start our app, we can access the admin-panel on `localhost:8000/admin`.
+
+### Models Unchained
+
+Models in Django are essentially just python classes.
+
+For example, a python class like this:
+
+```python-class
+Class Product:
+  id = integer
+  name = string
+  price = float
+```
+
+Will result in a table like this:
+
+| ID  | Name | Price |
+| --- | ---- | ----- |
+| 1   | Karl | 3,50  |
+
+### Creating our Models
+
+```python
+class Customer(models.Model):
+  name = models.CharField(max_length=200, null=True)
+  phone = models.CharField(max_length=200, null=True)
+  email = models.CharField(max_length=200, null=True)
+  date_created = models.DateTimeField(auto_now_add=True, null=True)
+```
+
+Don't forget to make a new migration.
+
+To interact with our models while using sqlite in development, we can add it to the admin-panel. This way we can easily test out our database-functionality.
+
 ## Sources
 
 [default-page]: https://i.imgur.com/Hzf1zGR.png
 [getting-started]: https://docs.djangoproject.com/en/4.0/intro/tutorial01/
-[Django-URLs]: https://i.imgur.com/KHknp9h.png
-[Bootstrap]: https://getbootstrap.com/
-
-
+[django-urls]: https://i.imgur.com/KHknp9h.png
+[bootstrap]: https://getbootstrap.com/
