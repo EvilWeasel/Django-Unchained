@@ -365,6 +365,10 @@ class Customer(models.Model):
   phone = models.CharField(max_length=200, null=True)
   email = models.CharField(max_length=200, null=True)
   date_created = models.DateTimeField(auto_now_add=True, null=True)
+
+  # this next bit is there to override the "toString"-Method
+  def __str__(self):
+    return self.name
 ```
 
 Don't forget to make a new migration.
